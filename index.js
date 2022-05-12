@@ -1,7 +1,7 @@
 const express = require('express')
 const app = express()
 
-const notes = [
+const persons = [
 	{ 
 		"id": 1,
 		"name": "Arto Hellas", 
@@ -25,13 +25,13 @@ const notes = [
 ]
 
 app.get('/api/persons', (request, response) => {
-	response.json(notes)
+	response.json(persons)
 })
 
 app.get('/info', (request, response) => {
-	const count = notes ? notes.length : 0
+	const count = persons ? persons.length : 0
 	const date = new Date()
-	const info = `Phonebook has info for ${count}\n${date}`
+	const info = `Phonebook has info for ${count} people.\n${date}`
 	response.end(info)
 })
 
