@@ -59,6 +59,11 @@ app.post('/api/persons/', (request, response) => {
 		return response.status(400).json({
 			error: 'content missing'
 		})
+	const alreadyExistPerson = persons.find(p => p.name === body.name)
+	if (alreadyExistPerson)
+		return response.status(409).json({
+			error: 'name must be unique'
+		})
 	const newId = Math.floor(Math.random() * 10000)
 	const newPerson = { ...request.body, id: newId }
 	persons = persons.concat(newPerson)
