@@ -21,27 +21,28 @@ app.get('/api/persons', (_, response) => {
 })
 
 app.get('/info', (_, response) => {
-	const count = persons ? persons.length : 0
+	const count = Person.length
 	const date = new Date()
 	const info = `Phonebook has info for ${count} people.\n${date}`
 	return response.end(info)
 })
 
 app.get('/api/persons/:id', (request, response) => {
-	const id = Number(request.params.id)
-	const person = persons.find(p => p.id === id)
-	if (!person)
-		return response.status(404).end()
-	return response.json(person)
+	const requestId = request.params.id
+	return Person.findById(requestId).then(person => {
+		if (!person)
+			return response.status(404).end()
+		return response.json(person)
+	})
 })
 
 app.delete('/api/persons/:id', (request, response) => {
-	const id = Number(request.params.id)
-	const person = persons.find(p => p.id === id)
-	if (!person)
-		return response.status(404).end()
-	persons = persons.filter(p => p.id !== id)
-	return response.status(204).end()
+	const requestId = request.params.id
+	return Person.findByIdAndDelete(requestId).then(person => {
+		if (!person)
+			return response.status(404).end()
+		return response.json(person)
+	})
 })
 
 app.post('/api/persons/', (request, response) => {
@@ -50,15 +51,20 @@ app.post('/api/persons/', (request, response) => {
 		return response.status(400).json({
 			error: 'content missing'
 		})
-	const alreadyExistPerson = persons.find(p => p.name === body.name)
-	if (alreadyExistPerson)
-		return response.status(409).json({
-			error: 'name must be unique'
-		})
-	const newId = Math.floor(Math.random() * 10000)
-	const newPerson = { ...request.body, id: newId }
-	persons = persons.concat(newPerson)
-	return response.json(newPerson)
+	return Person.create(body).then(result => {
+		return response.json(result)
+	})
+})
+
+app.put('/api/persons/:id', (request, response) => {
+	const requestId = request.params.id
+	const update = request.body
+	return Person.findByIdAndUpdate(requestId, update, { new: true })
+		.then(updatedPerson => {
+			if (!updatedPerson)
+				return response.status(404).end()
+			return response.json(updatedPerson)
+	})
 })
 
 const PORT = process.env.PORT || 3001
