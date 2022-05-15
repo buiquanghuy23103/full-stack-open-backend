@@ -35,7 +35,6 @@ app.get('/api/persons/:id', (request, response, next) => {
 			return response.status(404).end()
 		return response.json(person)
 	}).catch(error => {
-		console.log('error=', error)
 		next(error)
 	})
 })
@@ -45,7 +44,7 @@ app.delete('/api/persons/:id', (request, response) => {
 	return Person.findByIdAndDelete(requestId).then(person => {
 		if (!person)
 			return response.status(404).end()
-		return response.json(person)
+		return response.status(204).end()
 	})
 })
 
@@ -62,7 +61,11 @@ app.post('/api/persons/', (request, response) => {
 
 app.put('/api/persons/:id', (request, response) => {
 	const requestId = request.params.id
-	const update = request.body
+	const body = request.body
+	const update = {
+		name: body?.name,
+		number: body?.number
+	}
 	return Person.findByIdAndUpdate(requestId, update, { new: true })
 		.then(updatedPerson => {
 			if (!updatedPerson)
@@ -73,6 +76,7 @@ app.put('/api/persons/:id', (request, response) => {
 
 // errorMiddleware should always be at the end of this file
 const errorMiddleware = (error, request, response, next) => {
+	console.log('error: ', error)
 	if (error.name === 'CastError')
 		return response.status(400).json({ error: 'malformed id' })
 	next(error)
