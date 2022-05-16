@@ -4,7 +4,7 @@ const express = require('express')
 const app = express()
 
 const morgan = require('morgan')
-morgan.token('req-body', (request, _) => JSON.stringify(request.body))
+morgan.token('req-body', (request) => JSON.stringify(request.body))
 
 const cors = require('cors')
 
@@ -15,10 +15,10 @@ app.use(express.static('build'))
 
 const Person = require('./models/person')
 
-app.get('/persons', (_, response) => {
+app.get('/persons', (_, response, next) => {
 	return Person.find({}).then(persons => {
 		return response.json(persons)
-	}).catch(error =>  next(error))
+	}).catch(error => next(error))
 })
 
 app.get('/info', (_, response) => {
@@ -37,7 +37,7 @@ app.get('/persons/:id', (request, response, next) => {
 	}).catch(error =>  next(error))
 })
 
-app.delete('/persons/:id', (request, response) => {
+app.delete('/persons/:id', (request, response, next) => {
 	const requestId = request.params.id
 	return Person.findByIdAndDelete(requestId).then(person => {
 		if (!person)
@@ -57,14 +57,14 @@ app.put('/persons/:id', (request, response, next) => {
 	const requestId = request.params.id
 	const { name, number } = request.body
 	return Person.findByIdAndUpdate(
-			requestId,
-			{ name, number },
-			{ new: true, runValidators: true, context: 'query' })
+		requestId,
+		{ name, number },
+		{ new: true, runValidators: true, context: 'query' })
 		.then(updatedPerson => {
 			if (!updatedPerson)
 				return response.status(404).end()
-			return response.json(updatedPerson)
-	}).catch(error =>  next(error))
+			return response.json(updatedPerson)})
+		.catch(error =>  next(error))
 })
 
 // errorMiddleware should always be at the end of this file
