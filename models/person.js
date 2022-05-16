@@ -1,5 +1,6 @@
 
 const mongoose = require('mongoose')
+const Utils = require('../utils')
 const url = process.env.MONGODB_URI
 
 mongoose.connect(url)
@@ -13,6 +14,11 @@ const personSchema = new mongoose.Schema({
 	},
 	number: {
 		type: String,
+		minlength: 8,
+		validate: {
+			validator: Utils.validatePhoneNumber,
+			message: 'Invalid mobile phone number'
+		},
 		required: true
 	}
 })
