@@ -15,7 +15,7 @@ app.use(express.static('build'))
 
 const Person = require('./models/person')
 
-app.get('/api/persons', (_, response) => {
+app.get('/persons', (_, response) => {
 	return Person.find({}).then(persons => {
 		return response.json(persons)
 	}).catch(error =>  next(error))
@@ -28,7 +28,7 @@ app.get('/info', (_, response) => {
 	return response.end(info)
 })
 
-app.get('/api/persons/:id', (request, response, next) => {
+app.get('/persons/:id', (request, response, next) => {
 	const requestId = request.params.id
 	return Person.findById(requestId).then(person => {
 		if (!person)
@@ -37,7 +37,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 	}).catch(error =>  next(error))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete('/persons/:id', (request, response) => {
 	const requestId = request.params.id
 	return Person.findByIdAndDelete(requestId).then(person => {
 		if (!person)
@@ -46,14 +46,14 @@ app.delete('/api/persons/:id', (request, response) => {
 	}).catch(error =>  next(error))
 })
 
-app.post('/api/persons/', (request, response, next) => {
+app.post('/persons/', (request, response, next) => {
 	const body = request?.body
 	return Person.create(body).then(result => {
 		return response.json(result)
 	}).catch(error => next(error))
 })
 
-app.put('/api/persons/:id', (request, response, next) => {
+app.put('/persons/:id', (request, response, next) => {
 	const requestId = request.params.id
 	const { name, number } = request.body
 	return Person.findByIdAndUpdate(
