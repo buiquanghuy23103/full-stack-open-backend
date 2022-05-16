@@ -18,7 +18,7 @@ const Person = require('./models/person')
 app.get('/api/persons', (_, response) => {
 	return Person.find({}).then(persons => {
 		return response.json(persons)
-	})
+	}).catch(error =>  next(error))
 })
 
 app.get('/info', (_, response) => {
@@ -34,9 +34,7 @@ app.get('/api/persons/:id', (request, response, next) => {
 		if (!person)
 			return response.status(404).end()
 		return response.json(person)
-	}).catch(error => {
-		next(error)
-	})
+	}).catch(error =>  next(error))
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -45,33 +43,28 @@ app.delete('/api/persons/:id', (request, response) => {
 		if (!person)
 			return response.status(404).end()
 		return response.status(204).end()
-	})
+	}).catch(error =>  next(error))
 })
 
-app.post('/api/persons/', (request, response) => {
+app.post('/api/persons/', (request, response, next) => {
 	const body = request?.body
-	if (!body || !body.name || !body.number)
-		return response.status(400).json({
-			error: 'content missing'
-		})
 	return Person.create(body).then(result => {
 		return response.json(result)
-	})
+	}).catch(error => next(error))
 })
 
-app.put('/api/persons/:id', (request, response) => {
+app.put('/api/persons/:id', (request, response, next) => {
 	const requestId = request.params.id
-	const body = request.body
-	const update = {
-		name: body?.name,
-		number: body?.number
-	}
-	return Person.findByIdAndUpdate(requestId, update, { new: true })
+	const { name, number } = request.body
+	return Person.findByIdAndUpdate(
+			requestId,
+			{ name, number },
+			{ new: true, runValidators: true, context: 'query' })
 		.then(updatedPerson => {
 			if (!updatedPerson)
 				return response.status(404).end()
 			return response.json(updatedPerson)
-	})
+	}).catch(error =>  next(error))
 })
 
 // errorMiddleware should always be at the end of this file
@@ -79,6 +72,8 @@ const errorMiddleware = (error, request, response, next) => {
 	console.log('error: ', error)
 	if (error.name === 'CastError')
 		return response.status(400).json({ error: 'malformed id' })
+	else if (error.name === 'ValidationError')
+		return response.status(400).json({ error: error.message })
 	next(error)
 }
 app.use(errorMiddleware)
